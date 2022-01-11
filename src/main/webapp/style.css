@@ -28,6 +28,21 @@ h1 {
 	background-color: #81c3f7;
 }
 
+.btn2 {
+	text-decoration: none;
+	background-color: #D51213;
+	padding: 5px 10px;
+	color: #FFF;
+	font-size: 1.2em;
+	font-weight: 700;
+	border-radius: 5px;
+	
+}
+.btn2:hover {
+	background-color: #d42828;
+}
+
+
 .box1 {
 	width: 320px;
 	padding: 5px;

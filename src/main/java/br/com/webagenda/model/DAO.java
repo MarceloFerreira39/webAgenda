@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-import com.mysql.cj.xdevapi.Result;
+
 
 public class DAO {
 
@@ -32,14 +32,14 @@ public class DAO {
 		}
 	}
 
-	/** CRUS CREATE **/
+	/** CRUD CREATE ================================================================= **/
 	public void inserirContato(JavaBeans contato) {
 		String insert = "insert INTO contatos (nome, Fone, email) values (?,?,?)";
 		try {
-			// Abrir a conexão com o DB
+			// Abrir a conexï¿½o com o DB
 			Connection con = conectar();
 
-			// Preparar a query para execução no DB
+			// Preparar a query para execuï¿½ï¿½o no DB
 			PreparedStatement pst = con.prepareStatement(insert);
 
 			// Subistituir os parametros (?) pelo conteudo das variaves JavaBeans
@@ -50,7 +50,7 @@ public class DAO {
 			// Executar a query
 			pst.executeUpdate();
 
-			// Encerrar a conexão com o Banco
+			// Encerrar a conexï¿½o com o Banco
 			con.close();
 
 		} catch (Exception e) {
@@ -63,12 +63,12 @@ public class DAO {
 		// Criando objeto para acessar a classe JavaBeans
 		ArrayList<JavaBeans> contatos = new ArrayList<>();
 
-		String read = "select * from contatos order by Idcon";
+		String read = "select * from contatos order by nome";
 		try {
 			Connection con = conectar();
 			PreparedStatement pst = con.prepareStatement(read);
 			ResultSet rs = pst.executeQuery();
-			// O laço abaixo sera executado enquanto houver contatos
+			// O laÃ§o abaixo sera executado enquanto houver contatos
 			while (rs.next()) {
 				// Variaveis de apoio que recebem os dados do DB
 				String idcon = rs.getString(1);
@@ -91,7 +91,7 @@ public class DAO {
 			
 	}
 	
-		/**CRUD UPDATE**/
+		/**CRUD UPDATE*===========================================================*/
 		public void selecionarContato(JavaBeans contato) {
 			String read2 = "select * from contatos where idcon = ?";
 			try {
@@ -127,6 +127,18 @@ public class DAO {
 				System.out.println(e);
 			}
 		}
-		
+		/**CRUD DELETE =========================================================**/
+		public void deletarContato(JavaBeans contato) {
+			String delete = "delete from contatos where idcon=?";
+			try {
+				Connection con = conectar();
+				PreparedStatement pst = con.prepareStatement(delete);
+				pst.setString(1, contato.getIdcon());
+				pst.executeUpdate();
+				con.close();
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		}
 
 }

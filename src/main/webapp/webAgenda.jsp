@@ -19,6 +19,7 @@
 <body>
 	<h1>Agenda de Contatos</h1>
 	<a href="./novo.html" class="btn1">Novo contato</a>
+	<a href="report" class="btn2">Relatório</a>
 	<table id="tabela">
 		<thead>
 			<tr>
@@ -37,10 +38,14 @@
 					<td><%=lista.get(i).getNome()%></td>
 					<td><%=lista.get(i).getFone()%></td>
 					<td><%=lista.get(i).getEmail()%></td>
-					<td><a href="select?idcon=<%=lista.get(i).getIdcon() %>" class="btn1">Editar</a></td>
+					<td>
+						<a href="select?idcon=<%=lista.get(i).getIdcon() %>" class="btn1">Editar</a>
+						<a href="javascript: confirmar(<%=lista.get(i).getIdcon() %>)" class="btn2">Excluir</a>
+					</td>
 				</tr>
 			<%} %>
 		</tbody>
 	</table>
+	<script src="./scripts/confirming.js"></script>
 </body>
 </html>

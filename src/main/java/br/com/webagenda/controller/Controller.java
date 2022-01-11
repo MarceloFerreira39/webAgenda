@@ -10,12 +10,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.connector.Response;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import br.com.webagenda.model.DAO;
 import br.com.webagenda.model.JavaBeans;
 
-@WebServlet(urlPatterns = { "/Controller", "/main", "/insert", "/select", "/update" })
+@WebServlet(urlPatterns = { "/Controller", "/main", "/insert", "/select", "/update", "/delete", "/report" })
 public class Controller extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	DAO dao = new DAO();
@@ -40,6 +44,10 @@ public class Controller extends HttpServlet {
 			listarContato(request, response);
 		} else if (action.equals("/update")) {
 			editarContato(request, response);
+		} else if (action.equals("/delete")) {
+			removerContato(request, response);
+		} else if (action.equals("/report")) {
+			gerarRelatorio(request, response);
 		} else {
 			response.sendRedirect("index.html");
 		}
@@ -55,13 +63,15 @@ public class Controller extends HttpServlet {
 		request.setAttribute("contatos", lista);
 		RequestDispatcher rd = request.getRequestDispatcher("webAgenda.jsp");
 		rd.forward(request, response);
+
 		// Teste de recebimento da lista
-		for (int i = 0; i < lista.size(); i++) {
-			System.out.println(lista.get(i).getIdcon());
-			System.out.println(lista.get(i).getNome());
-			System.out.println(lista.get(i).getFone());
-			System.out.println(lista.get(i).getEmail());
-		}
+		/*
+		 * for (int i = 0; i < lista.size(); i++) {
+		 * System.out.println(lista.get(i).getIdcon());
+		 * System.out.println(lista.get(i).getNome());
+		 * System.out.println(lista.get(i).getFone());
+		 * System.out.println(lista.get(i).getEmail()); }
+		 */
 	}
 
 	// Novo contato
@@ -85,7 +95,8 @@ public class Controller extends HttpServlet {
 
 	}
 
-	// Editar contato =====================================================================/
+	// Editar contato
+	// =====================================================================/
 	protected void listarContato(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String idcon = request.getParameter("idcon");
@@ -105,6 +116,8 @@ public class Controller extends HttpServlet {
 		RequestDispatcher rd = request.getRequestDispatcher("editar.jsp");
 		rd.forward(request, response);
 	}
+
+	// EDITAR CONTATO
 	protected void editarContato(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// Setar as variaveis JavaBeans
@@ -112,10 +125,74 @@ public class Controller extends HttpServlet {
 		contato.setNome(request.getParameter("nome"));
 		contato.setFone(request.getParameter("fone"));
 		contato.setEmail(request.getParameter("email"));
-		//Executar o método alterarContato
+		// Executar o método alterarContato
 		dao.alterarContato(contato);
-		// Redirecionar para o documento webAgenda.jsp (Atualizando as alterações nos contatos)
+		// Redirecionar para o documento webAgenda.jsp (Atualizando as alterações nos
+		// contatos)
 		response.sendRedirect("main");
 	}
-	
+
+	// REMOVER CONTATO
+	protected void removerContato(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// recebimento do ID do contato a ser excluido (validador.js)
+		String idcon = request.getParameter("idcon");
+		
+		// Setar a variavel Idcon JavaBeans
+		contato.setIdcon(idcon);
+		
+		// Executar o método deletarContato (DAO) passando objeto contato
+		dao.deletarContato(contato);
+		
+		// Redirecionar para o documento webAgenda.jsp (Atualizando as alterações nos contatos)
+		response.sendRedirect("main");
+
+	}
+	// GERAR RELATORIO EM PDF ===================================================================//
+		protected void gerarRelatorio(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+			Document documento = new Document();
+			try {
+				//tipo de conteúdo
+				response.setContentType("aplicattion/pdf");
+				
+				//Nome do documento
+				response.addHeader("content-Disposition", "inline; filename=" + "contatos.pdf");
+				
+				//Criar o Documento
+				PdfWriter.getInstance(documento, response.getOutputStream());
+				
+				//Abrir o documento -> Conteúdo
+				documento.open();
+				documento.add(new Paragraph("Lista de contatos:"));
+				documento.add(new Paragraph(" "));
+				
+				//Criar uma tabela
+				PdfPTable tabela = new PdfPTable(3); 
+				
+				//Cabeçalho
+				PdfPCell col1 = new PdfPCell(new Paragraph("Nome"));
+				PdfPCell col2 = new PdfPCell(new Paragraph("Fone"));
+				PdfPCell col3 = new PdfPCell(new Paragraph("E-mail"));
+				tabela.addCell(col1);
+				tabela.addCell(col2);
+				tabela.addCell(col3);
+				
+				//Popular a tabela com os contatos 
+				ArrayList<JavaBeans> lista = dao.listarContatos();
+				for(int i = 0; i < lista.size(); i++) {
+					tabela.addCell(lista.get(i).getNome());
+					tabela.addCell(lista.get(i).getFone());
+					tabela.addCell(lista.get(i).getEmail());
+				}
+				documento.add(tabela);
+				
+				
+				documento.close();
+			} catch (Exception e) {
+				System.out.println(e);
+				documento.close();
+			}
+		}
+
 }
